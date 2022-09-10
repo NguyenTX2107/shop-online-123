@@ -3,6 +3,7 @@ package com.assignment.shoponline.entity.dto;
 import com.assignment.shoponline.entity.Product;
 import com.assignment.shoponline.utils.Enums;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ public class ProductDto {
     private String detail; //chi tiet
     private String image; //anh
     private BigDecimal price; //don gia
+    @CreationTimestamp
     private Date date;
     private Enums.ProductStatus status;
 
@@ -58,10 +60,10 @@ public class ProductDto {
             ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Status is not null");
             return false;
         }
-        if (null == this.getDate()) {
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Date is not null");
-            return false;
-        }
+//        if (null == this.getDate()) {
+//            ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Date is not null");
+//            return false;
+//        }
         return true;
     }
 }

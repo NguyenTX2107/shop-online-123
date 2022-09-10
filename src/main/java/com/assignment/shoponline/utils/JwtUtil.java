@@ -1,32 +1,63 @@
 package com.assignment.shoponline.utils;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.security.core.userdetails.UserDetails;
+import com.assignment.shoponline.entity.Account;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.interfaces.DecodedJWT;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
-public class JwtUtil {
+public class JwtUtil { //sinh token theo role
+    public static Algorithm algorithm;
+    public static JWTVerifier verifier;
+    private static final String JWT_SECRET_KEY = "SD23xbts2345dsgfsdagSDFGDFG";
+    private static final int EXPIRED_TIME = 60 * 60; //1 hour
+    public static final String ROLE_CLAIM_KEY = "role";
+    private static final String DEFAULT_ISSUER = "T2009M1";
 
-    private static final String jwtSecret = "SD23xbts2345dsgfsdagSDFGDFG";
-    public static String generateTokenByAccount(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>();
-        return Jwts.builder().setClaims(claims).setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 60 * 1000))
-                .signWith(SignatureAlgorithm.HS512, jwtSecret).compact();
+    public static Algorithm getAlgorithm() {
+        if (null == algorithm) {
+            algorithm = Algorithm.HMAC256(JWT_SECRET_KEY.getBytes());
+        }
+        return algorithm;
     }
-    public Boolean validateJwtToken(String token, UserDetails userDetails) {
-        String username = getUsernameFromToken(token);
-        Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
-        Boolean isTokenExpired = claims.getExpiration().before(new Date());
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired);
+
+    public static JWTVerifier getVerifier() {
+        if (verifier == null) {
+            verifier = JWT.require(getAlgorithm()).build();
+        }
+        return verifier;
     }
-    public String getUsernameFromToken(String token) {
-        final Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
-        return claims.getSubject();
+
+    public static DecodedJWT getDecodedJwt(String token) {
+        DecodedJWT decodedJWT = getVerifier().verify(token);
+        return decodedJWT;
+    }
+
+    public static String generateToken(String subject, String role, String issuer) {
+        if (null == role || role.length() == 0) {
+            return JWT.create()
+                    .withSubject(subject)
+                    .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRED_TIME*1000))
+                    .withIssuer(issuer)
+                    .sign(getAlgorithm());
+        }
+        return JWT.create()
+                .withSubject(subject)
+                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRED_TIME*1000))
+                .withIssuer(issuer)
+                .withClaim(JwtUtil.ROLE_CLAIM_KEY, role)
+                .sign(getAlgorithm());
+    }
+
+    public static String generateTokenByAccount(Account account) {
+        return JWT.create()
+                .withSubject(String.valueOf(account.getId()))
+                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRED_TIME*1000))
+                .withIssuer(DEFAULT_ISSUER)
+                .withClaim(JwtUtil.ROLE_CLAIM_KEY, account.getRole() == Enums.Role.ADMIN ? "ADMIN":"USER")
+                .withClaim("userName", account.getUserName())
+                .sign(getAlgorithm());
     }
 }

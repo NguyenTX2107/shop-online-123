@@ -13,11 +13,12 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin("*")
 @Slf4j
 @RequiredArgsConstructor
-@RequestMapping("api/v1/accounts")
+@RestController
+@RequestMapping("/api/v1/accounts")
 public class AccountRestController {
     final AccountService accountService;
 
-    @PostMapping("register")
+    @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody AccountRegisterDto accountRegisterDto) {
         try {
             Account account = accountService.register(accountRegisterDto);
@@ -30,7 +31,7 @@ public class AccountRestController {
         }
     }
 
-    @GetMapping("login")
+    @GetMapping("/login")
     public ResponseEntity<?> login(@RequestBody AccountLoginDto accountLoginDto) {
         try{
             Credential credential = accountService.login(accountLoginDto);

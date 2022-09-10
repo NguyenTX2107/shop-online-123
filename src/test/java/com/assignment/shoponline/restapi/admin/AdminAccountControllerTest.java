@@ -1,5 +1,6 @@
 package com.assignment.shoponline.restapi.admin;
 
+import com.assignment.shoponline.entity.Account;
 import com.assignment.shoponline.entity.dto.AccountLoginDto;
 import com.assignment.shoponline.entity.dto.AccountRegisterDto;
 import com.assignment.shoponline.service.AccountService;
@@ -20,14 +21,18 @@ class AdminAccountControllerTest {
         try {
             //
             AccountRegisterDto accountRegisterDto = new AccountRegisterDto();
-            accountRegisterDto.setUserName("HelloWorld");
+            accountRegisterDto.setUserName("User_hello");
             accountRegisterDto.setPassword("123456");
-            accountRegisterDto.setPhone("0114549878989");
-            accountRegisterDto.setEmail("49q34sfgs98@gmailrqwr.com");
+            accountRegisterDto.setPhone("04191657498");
+            accountRegisterDto.setEmail("fgs98@gmail.com");
             accountRegisterDto.setRole(Enums.Role.USER);
-            accountRegisterDto.setAvatarUrl("/sqwehg.png");
+            accountRegisterDto.setAvatarUrl("/dsf.png");
             //
-            accountService.register(accountRegisterDto);
+            Account account = accountService.register(accountRegisterDto);
+            if (null == account) {
+                System.out.println("Register fail");
+                return;
+            }
             ResponseEntity.ok("Successfully create new account");
             System.out.println("Tao tai khoan thanh cong");
         } catch (Exception e) {

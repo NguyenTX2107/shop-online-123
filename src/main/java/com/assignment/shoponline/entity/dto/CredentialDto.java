@@ -12,6 +12,6 @@ import lombok.Setter;
 public class CredentialDto {
     private String accessToken;
     private String refreshToken;
-    private long expiredAt;
+    private int expiredAt;
     private String scope;
 }

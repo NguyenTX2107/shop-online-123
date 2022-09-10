@@ -33,7 +33,7 @@ public class AccountRegisterDto {
             return false;
         }
         if (null == this.getEmail() || this.getEmail().equals("")) {
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Phone number is not null");
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email is not null");
             return false;
         }
         return true;
