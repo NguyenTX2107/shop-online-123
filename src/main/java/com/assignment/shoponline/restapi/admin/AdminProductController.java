@@ -1,11 +1,12 @@
 package com.assignment.shoponline.restapi.admin;
 
+import com.assignment.shoponline.entity.Account;
 import com.assignment.shoponline.entity.Product;
 import com.assignment.shoponline.entity.dto.ProductDto;
+import com.assignment.shoponline.service.AccountService;
 import com.assignment.shoponline.service.ProductService;
 import com.assignment.shoponline.utils.Enums;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -13,18 +14,19 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
 @CrossOrigin("*")
-@Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("api/admin/v1/products")
 public class AdminProductController {
     final ProductService productService;
+    final AccountService accountService;
 
     @GetMapping("{id}")
     public ResponseEntity<?> getDetail(@PathVariable Long id) {
@@ -40,7 +42,7 @@ public class AdminProductController {
         }
     }
 
-    @GetMapping("list")
+    @GetMapping
     public ResponseEntity<?> search(@RequestParam(value = "page", defaultValue = "1") int page,
                                     @RequestParam(value = "limit", defaultValue = "5") int limit,
                                     @RequestParam(value = "name", defaultValue = "") String name,
@@ -58,13 +60,14 @@ public class AdminProductController {
     }
 
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody ProductDto productDto, Authentication principal) {
+    public ResponseEntity<?> create(@RequestBody ProductDto productDto, Authentication authentication) {
         try{
-            Long adminId = Long.parseLong(principal.getName());
-            productService.create(productDto, adminId);
+            authentication = SecurityContextHolder.getContext().getAuthentication(); //test: authen da duoc luu lai trong context
+            Account account = accountService.findByUsername(authentication.getName());
+            productService.create(productDto, account.getId());
             return ResponseEntity.ok("Create Success");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Fail to create new product");
+            return ResponseEntity.badRequest().body("Error when creating new product");
         }
     }
 

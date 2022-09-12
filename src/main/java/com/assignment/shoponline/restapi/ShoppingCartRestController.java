@@ -7,14 +7,13 @@ import com.assignment.shoponline.entity.shoppingcart.ShoppingCart;
 import com.assignment.shoponline.service.ProductService;
 import com.assignment.shoponline.service.ShoppingCartService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
 @CrossOrigin("*")
-@Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("api/v1/carts")
@@ -38,8 +37,9 @@ public class ShoppingCartRestController {
     }
 
     @PostMapping("{id}")
-    public ResponseEntity<?> addCartItem(@PathVariable Long id, @RequestParam(value = "accountId") Long accountId) {
+    public ResponseEntity<?> addCartItem(@PathVariable Long id, Authentication authentication) {
         try {
+            Long accountId = Long.parseLong(authentication.getPrincipal().toString());
             Optional<Product> optionalProduct = productService.findById(id);
             if (!optionalProduct.isPresent()) {
                 return ResponseEntity.badRequest().body("Product not found");
@@ -55,9 +55,12 @@ public class ShoppingCartRestController {
     @PutMapping
     public ResponseEntity<?> updateItemQuantity(
             @RequestParam(value = "cartItemId") CartItemId cartItemId,
-            @RequestParam(value = "quantity") int quantity) {
+            @RequestParam(value = "quantity") int quantity,
+            Authentication authentication) {
         try {
-            ShoppingCart shoppingCart = shoppingCartService.updateQuantityToItem(cartItemId, quantity);
+            Long accountId = Long.parseLong(authentication.getPrincipal().toString());
+            ShoppingCart shoppingCart = shoppingCartService.findByAccountId(accountId);
+            shoppingCartService.updateQuantityToItem(cartItemId, quantity, shoppingCart);
             ShoppingCartDto shoppingCartDto = new ShoppingCartDto(shoppingCart);
             return ResponseEntity.ok().body(shoppingCartDto);
         } catch (Exception e) {
@@ -65,11 +68,10 @@ public class ShoppingCartRestController {
         }
     }
 
-    @DeleteMapping
-    public ResponseEntity<?> removeCartItem (
-            @RequestParam(value = "accountId") Long accountId,
-            @RequestParam(value = "productId") Long productId) {
+    @DeleteMapping({"{productId}"})
+    public ResponseEntity<?> removeCartItem (@PathVariable Long productId, Authentication authentication){
         try {
+            Long accountId = Long.parseLong(authentication.getPrincipal().toString());
             ShoppingCart shoppingCart = shoppingCartService.findByAccountId(accountId);
             if (null == shoppingCart) {
                 return ResponseEntity.badRequest().body("Shopping Cart is empty");
@@ -85,9 +87,10 @@ public class ShoppingCartRestController {
         }
     }
 
-    @DeleteMapping("{id}")
-    public ResponseEntity<?> removeAllCartItems(@PathVariable Long accountId) {
+    @DeleteMapping
+    public ResponseEntity<?> removeAllCartItems(Authentication authentication) {
         try {
+            Long accountId = Long.parseLong(authentication.getPrincipal().toString());
             ShoppingCart shoppingCart = shoppingCartService.findByAccountId(accountId);
             if (null == shoppingCart) {
                 System.out.println("Shopping cart is empty");

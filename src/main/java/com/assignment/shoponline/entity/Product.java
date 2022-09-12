@@ -3,7 +3,6 @@ package com.assignment.shoponline.entity;
 import com.assignment.shoponline.entity.basic.BaseEntity;
 import com.assignment.shoponline.utils.Enums;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;

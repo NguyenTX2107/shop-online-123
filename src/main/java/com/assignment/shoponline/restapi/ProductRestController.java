@@ -5,24 +5,24 @@ import com.assignment.shoponline.entity.dto.ProductDto;
 import com.assignment.shoponline.service.ProductService;
 import com.assignment.shoponline.utils.Enums;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
 @CrossOrigin("*")
-@Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("api/v1/products")
 public class ProductRestController {
     final ProductService productService;
+
     @GetMapping("{id}")
     public ResponseEntity<?> getDetail(@PathVariable Long id) {
         try {
@@ -48,6 +48,7 @@ public class ProductRestController {
         try {
             Pageable pageable = PageRequest.of(page - 1, limit, Sort.by("createdAt").descending());
             Page<Product> products = productService.search(name, priceFrom, priceTo, status, category, pageable);
+
             return ResponseEntity.status(HttpStatus.OK.value()).body(products);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Action fails.");

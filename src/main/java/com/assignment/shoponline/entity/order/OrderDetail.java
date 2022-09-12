@@ -1,6 +1,7 @@
 package com.assignment.shoponline.entity.order;
 
 import com.assignment.shoponline.entity.Product;
+import com.assignment.shoponline.entity.shoppingcart.CartItem;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
@@ -31,4 +32,10 @@ public class OrderDetail  {
     private Product product;
     private Integer quantity;
     private BigDecimal unitPrice;
+
+    public OrderDetail(CartItem cartItem) {
+        this.product = cartItem.getProduct();
+        this.quantity = cartItem.getQuantity();
+        this.unitPrice = cartItem.getUnitPrice();
+    }
 }

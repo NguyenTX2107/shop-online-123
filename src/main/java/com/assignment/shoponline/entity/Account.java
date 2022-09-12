@@ -18,12 +18,12 @@ public class Account extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String userName;
+    private String username;
     private String passwordHash;
     private String phone;
     @Email
     private String email;
-    private String avatarUrl = "sdfsdfsdf"; //default
+    private String avatarUrl; //default
     @Enumerated(EnumType.ORDINAL)
     private Enums.Role role;
 }

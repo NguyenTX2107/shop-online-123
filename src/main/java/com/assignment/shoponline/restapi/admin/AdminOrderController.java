@@ -2,12 +2,9 @@ package com.assignment.shoponline.restapi.admin;
 
 import com.assignment.shoponline.service.OrderService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin("*")
-@Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/admin/v1/orders")

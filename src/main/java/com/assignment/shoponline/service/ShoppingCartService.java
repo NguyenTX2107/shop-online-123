@@ -7,7 +7,8 @@ import com.assignment.shoponline.entity.shoppingcart.ShoppingCart;
 import com.assignment.shoponline.repository.CartItemRepository;
 import com.assignment.shoponline.repository.ShoppingCartRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class ShoppingCartService {
     final ShoppingCartRepository shoppingCartRepository;
@@ -29,7 +31,7 @@ public class ShoppingCartService {
      * Phần thêm số lượng item sẽ dùng method khác ở dưới :v
      * Mặc định khi add cart thì quantity của nó là 1 (xem CartItem Entity)
      */
-    @Transactional
+    @Transactional //roll back nếu xảy ra lỗi
     public ShoppingCart addItemToCart(Product product, Long accountId) {
         // tạo giỏ hàng mặc định.
         ShoppingCart defaultShoppingCart = null;
@@ -75,6 +77,11 @@ public class ShoppingCartService {
         return shoppingCartRepository.save(defaultShoppingCart);
     }
 
+    /**
+     * Tìm kiếm Shopping Cart theo accountId
+     * @param accountId
+     * @return ShoppingCart
+     */
     @Transactional
     public ShoppingCart findByAccountId(Long accountId) {
         // tạo giỏ hàng mặc định.
@@ -96,8 +103,15 @@ public class ShoppingCartService {
         return defaultShoppingCart;
     }
 
+    /**
+     * Update quantity của cart item 
+     * @param cartItemId nhận từ frontend
+     * @param quantity nhận từ frontend
+     * @return ShoppingCart
+     * @throws Exception
+     */
     @Transactional
-    public ShoppingCart updateQuantityToItem(CartItemId cartItemId, int quantity) throws Exception{
+    public void updateQuantityToItem(CartItemId cartItemId, int quantity, ShoppingCart shoppingCart) throws Exception{
         Optional<CartItem> cartItemOptional = cartItemRepository.findById(cartItemId);
         if (!cartItemOptional.isPresent()) {
             throw new Exception("Cart Item not found");
@@ -106,17 +120,11 @@ public class ShoppingCartService {
         cartItem.changeQuantity(quantity);
         //luu lai quantity cua cart item vao database
         cartItemRepository.save(cartItem);
-        //tìm lại shopping cart trong database để update lại total price
-        Optional<ShoppingCart> shoppingCart = shoppingCartRepository.findById(cartItemId.getShoppingCartId());
-        if (!shoppingCart.isPresent()) {
-            throw new Exception("Shopping Cart not found");
-        }
-        shoppingCart.get().updateTotalPrice();
-        return shoppingCart.get();
+        shoppingCart.updateTotalPrice();
     }
 
     /**
-     *
+     * Xóa một cart item khỏi shopping cart (xóa luôn cart item này khỏi database)
      * @param shoppingCart
      * @param productId
      * @return
@@ -127,7 +135,7 @@ public class ShoppingCartService {
         // kiểm tra sự tồn tại của sản phẩm trong giỏ hàng.
         CartItem cartItem = shoppingCart.getItemByProductId(productId);
         if (null == cartItem) {
-            System.out.println("Cart Item found");
+            log.error("Cart Item not found");
             return false;
         }
         shoppingCart.getItems().remove(cartItem);

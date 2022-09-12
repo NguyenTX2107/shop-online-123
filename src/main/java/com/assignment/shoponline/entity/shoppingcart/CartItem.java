@@ -1,7 +1,6 @@
 package com.assignment.shoponline.entity.shoppingcart;
 
 import com.assignment.shoponline.entity.Product;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 
@@ -21,7 +20,7 @@ public class CartItem {
     private CartItemId id;
     private String productName; // dùng để đỡ phải query lại trong database.
     private String productImage;
-    private int quantity = 1; //default
+    private int quantity; //default
     private BigDecimal unitPrice; // giá tại thời điểm mua.
     @ManyToOne
     @MapsId("shoppingCartId")

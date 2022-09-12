@@ -7,14 +7,16 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class JwtUtil { //sinh token theo role
     public static Algorithm algorithm;
     public static JWTVerifier verifier;
     private static final String JWT_SECRET_KEY = "SD23xbts2345dsgfsdagSDFGDFG";
-    private static final int EXPIRED_TIME = 60 * 60; //1 hour
+    public static final int EXPIRED_TIME = 60 * 60; //1 hour
     public static final String ROLE_CLAIM_KEY = "role";
-    private static final String DEFAULT_ISSUER = "T2009M1";
+    private static final String DEFAULT_ISSUER = "T2009M1"; // issuer = nguoi tao token
 
     public static Algorithm getAlgorithm() {
         if (null == algorithm) {
@@ -36,6 +38,7 @@ public class JwtUtil { //sinh token theo role
     }
 
     public static String generateToken(String subject, String role, String issuer) {
+        Map<String, String> headerClaims = new HashMap<>();
         if (null == role || role.length() == 0) {
             return JWT.create()
                     .withSubject(subject)
@@ -45,7 +48,7 @@ public class JwtUtil { //sinh token theo role
         }
         return JWT.create()
                 .withSubject(subject)
-                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRED_TIME*1000))
+                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRED_TIME*10000))
                 .withIssuer(issuer)
                 .withClaim(JwtUtil.ROLE_CLAIM_KEY, role)
                 .sign(getAlgorithm());
@@ -57,7 +60,7 @@ public class JwtUtil { //sinh token theo role
                 .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRED_TIME*1000))
                 .withIssuer(DEFAULT_ISSUER)
                 .withClaim(JwtUtil.ROLE_CLAIM_KEY, account.getRole() == Enums.Role.ADMIN ? "ADMIN":"USER")
-                .withClaim("userName", account.getUserName())
+                .withClaim("username", account.getUsername())
                 .sign(getAlgorithm());
     }
 }

@@ -2,7 +2,6 @@ package com.assignment.shoponline.repository;
 
 import com.assignment.shoponline.entity.shoppingcart.CartItem;
 import com.assignment.shoponline.entity.shoppingcart.CartItemId;
-import com.assignment.shoponline.entity.shoppingcart.ShoppingCart;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,8 +1,6 @@
 package com.assignment.shoponline.entity.shoppingcart;
 
 import com.assignment.shoponline.entity.basic.BaseEntity;
-import com.assignment.shoponline.entity.order.Order;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 

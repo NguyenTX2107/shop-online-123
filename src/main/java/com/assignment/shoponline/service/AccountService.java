@@ -7,8 +7,8 @@ import com.assignment.shoponline.entity.dto.AccountRegisterDto;
 import com.assignment.shoponline.repository.AccountRepository;
 import com.assignment.shoponline.utils.Enums;
 import com.assignment.shoponline.utils.JwtUtil;
-import jdk.nashorn.internal.ir.debug.JSONWriter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -23,67 +23,98 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
-public class AccountService implements UserDetailsService{
+public class AccountService implements UserDetailsService {
     final AccountRepository accountRepository;
     final PasswordEncoder passwordEncoder;
 
-    final int EXPIRED_AT = 1;
+    public Account findByUsername(String username) {
+        Optional<Account> optionalAccount = accountRepository.findByUsername(username);
+        if (!optionalAccount.isPresent()) {
+            log.error("Can not find account with username {}", username);
+            return null;
+        }
+        return optionalAccount.get();
+    }
 
     /**
-     *
+     * Register Service Method
      * @param accountRegisterDto gồm các thông tin tạo mới tài khoản
      * @return null nếu đã có tài khoản này tồn tại
      */
     public Account register(AccountRegisterDto accountRegisterDto) {
-        Optional<Account> optionalAccount = accountRepository.findAccountByUserName(accountRegisterDto.getUserName());
+        Optional<Account> optionalAccount = accountRepository.findByUsername(accountRegisterDto.getUsername());
         if (optionalAccount.isPresent()) {
-            System.out.println("Loi");
+            log.info("Account exists"); //khong cho username giong nhau
+            return null;
+        }
+        if (null == accountRegisterDto.getAvatarUrl() || accountRegisterDto.getAvatarUrl().length() == 0) {
+            accountRegisterDto.setAvatarUrl("/src/resources/static/images/default_avatar.png"); //set defaut avatar
+        }
+        if (!accountRegisterDto.isDataOK()) { //neu data nhap vao khong hop le thi return null
+            log.info("Input data is incorrect");
             return null;
         }
         Account account = Account.builder()
-                .userName(accountRegisterDto.getUserName())
+                .username(accountRegisterDto.getUsername())
                 .passwordHash(passwordEncoder.encode(accountRegisterDto.getPassword()))
+                .phone(accountRegisterDto.getPhone())
+                .email(accountRegisterDto.getEmail())
+                .avatarUrl(accountRegisterDto.getAvatarUrl())
                 .role(accountRegisterDto.getRole())
                 .build();
-        accountRepository.save(account);
-        return account;
+        return accountRepository.save(account);
     }
 
+    /**
+     * Login Service Method
+     * Không cần thiết nữa rồi (xem MyAuthenticationFilter)
+     * @param accountLoginDto gồm username và password đc truyền vào
+     * @return Crendential gồm token, scope, expired time
+     */
     public Credential login(AccountLoginDto accountLoginDto) {
-        //kiểm tra xem có user này chưa
-        Optional<Account> optionalAccount = accountRepository.findAccountByUserName(accountLoginDto.getUserName());
-        if (!optionalAccount.isPresent()) {
+        Optional<Account> optionalAccount = accountRepository.findByUsername(accountLoginDto.getUsername());
+        if(!optionalAccount.isPresent()){
+            log.error("User not found");
             return null;
         }
         Account account = optionalAccount.get();
         //kiểm tra xem pass truyền vào có chuẩn không
         boolean isMatch = passwordEncoder.matches(accountLoginDto.getPassword(), account.getPasswordHash());
         if (isMatch) {
-            String accessToken = JwtUtil.generateTokenByAccount(account);
-            String refreshToken = JwtUtil.generateTokenByAccount(account);
+            String accessToken =
+                    JwtUtil.generateTokenByAccount(account);
+            String refreshToken =
+                    JwtUtil.generateTokenByAccount(account);
             Credential credential = new Credential();
             credential.setAccessToken(accessToken);
             credential.setRefreshToken(refreshToken);
-            credential.setExpiredAt(EXPIRED_AT);
-            credential.setScope("basic_information");
+            credential.setExpiredAt(JwtUtil.EXPIRED_TIME);
+            if (account.getRole() == Enums.Role.ADMIN) {
+                credential.setScope("admin");
+            } else if (account.getRole() == Enums.Role.USER) {
+                credential.setScope("user");
+            }
             return credential;
         } else {
-            throw new UsernameNotFoundException("Password is not match");
+            log.error("Password is not match"); //pass sai => throw exception
+            return null;
         }
     }
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<Account> optionalAccount = accountRepository.findAccountByUserName(username);
+        Optional<Account> optionalAccount = accountRepository.findByUsername(username);
         if(!optionalAccount.isPresent()){
-            throw  new UsernameNotFoundException("Username is not found");
+            throw new UsernameNotFoundException("Username is not found");
         }
         Account account = optionalAccount.get();
         List<GrantedAuthority> authorities = new ArrayList<>();
         SimpleGrantedAuthority simpleGrantedAuthority =
                 new SimpleGrantedAuthority(account.getRole() == Enums.Role.ADMIN ? "ADMIN" : "USER");
         authorities.add(simpleGrantedAuthority);
-        return new User(account.getUserName(),account.getPasswordHash(),authorities);
+        return new User(account.getUsername(),account.getPasswordHash(),authorities);
     }
 }
 

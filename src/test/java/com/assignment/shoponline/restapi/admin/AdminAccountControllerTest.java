@@ -21,12 +21,11 @@ class AdminAccountControllerTest {
         try {
             //
             AccountRegisterDto accountRegisterDto = new AccountRegisterDto();
-            accountRegisterDto.setUserName("User_hello");
+            accountRegisterDto.setUsername("Admin2");
             accountRegisterDto.setPassword("123456");
-            accountRegisterDto.setPhone("04191657498");
-            accountRegisterDto.setEmail("fgs98@gmail.com");
-            accountRegisterDto.setRole(Enums.Role.USER);
-            accountRegisterDto.setAvatarUrl("/dsf.png");
+            accountRegisterDto.setPhone("04134498");
+            accountRegisterDto.setEmail("admin2@gmail.com");
+            accountRegisterDto.setRole(Enums.Role.ADMIN);
             //
             Account account = accountService.register(accountRegisterDto);
             if (null == account) {
@@ -46,7 +45,7 @@ class AdminAccountControllerTest {
         try {
             //
             AccountLoginDto accountLoginDto = new AccountLoginDto();
-            accountLoginDto.setUserName("LKJHG");
+            accountLoginDto.setUsername("LKJHG");
             accountLoginDto.setPassword("45");
             //
             accountService.login(accountLoginDto);

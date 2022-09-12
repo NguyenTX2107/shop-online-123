@@ -1,6 +1,5 @@
 package com.assignment.shoponline.entity.dto;
 
-import com.assignment.shoponline.entity.Account;
 import com.assignment.shoponline.entity.shoppingcart.ShoppingCart;
 import lombok.*;
 
