@@ -1,0 +1,52 @@
+/* Modal  */
+:root {
+    --modal-body-width: 400px;
+    --modal-body-height: 400px;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: none;
+}
+
+.modal__overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn ease-in 0.2s;
+    z-index: 0;
+}
+
+.modal__body {
+    position: relative;
+    margin: auto;
+    width: var(--modal-body-width);
+    height: var(--modal-body-height);
+    background-color: whitesmoke;
+    animation: growth linear 0.2s;
+    z-index: 1;
+    border-radius: 10px;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes growth {
+    from{
+        transform: scale(0.7);
+    }
+    to{
+        transform: scale(1);
+    }
+}
